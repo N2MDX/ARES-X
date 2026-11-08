@@ -1,0 +1,185 @@
+ARES-X 0.9.16 — WINDOWS DISTRIBUTION
+N2MDX | User Instructions and Quick Start
+============================================================
+
+WHAT THIS PACKAGE IS
+ARES-X is an experimental Windows amateur-radio digital-mode and station-tools application by N2MDX. This distribution contains the Python source, assets, dependency list, Windows build script, and these user instructions. It is not a prebuilt installer or a precompiled EXE. Build the Windows application on the target PC using the included build_windows.bat.
+
+IMPORTANT EXPERIMENTAL STATUS
+ARES-X is an evolving preview. Test receive functions and CAT readouts before attempting any on-air operation. The AX-1 mode is experimental and is not a validated replacement for established digital modes. WSJT-X remains the external FT4/FT8 modem and decoder. Always operate within your licence privileges and follow your radio manufacturer's instructions.
+
+1. PACKAGE CONTENTS
+- ares_x_windows.py: main application
+- ares_x_ax1_v02.py: experimental AX-1 functions
+- thetis_cat.py: CAT adapter used by Thetis/Flex-compatible profiles
+- yaesu_ftdx10_cat.py: Yaesu FTDX10 CAT adapter
+- wsjtx_bridge.py: WSJT-X UDP integration
+- assets/: bundled map and splash artwork assets
+- requirements.txt: Python packages required to build/run from source
+- build_windows.bat: Windows build script
+- test_wsjtx_bridge.py: bridge parser tests
+
+2. WINDOWS BUILD / FIRST LAUNCH
+Requirements:
+- Windows 10 or Windows 11, 64-bit
+- 64-bit Python 3.11 recommended (Python 3.12 may also work with the installed dependencies)
+- Internet access during the first build to install Python packages
+- A Windows account permitted to install Python packages
+
+Steps:
+1. Extract the complete distribution ZIP to a normal folder, for example:
+   C:\Radio\ARES-X-0.9.16\
+   Do not run the application from inside the ZIP preview.
+2. Install 64-bit Python 3.11. During installation, enable the Python launcher if offered.
+3. Open the extracted ARES-X-Windows-0.9.3 folder.
+4. Double-click build_windows.bat and allow it to finish. The script installs the listed requirements and uses PyInstaller to package the application.
+5. When the build completes, run:
+   dist\ARES-X\ARES-X.exe
+   Run the EXE inside the dist\ARES-X folder. Do not launch an EXE from the build folder.
+6. On first launch, Windows may show a security prompt for a locally built application. Only continue if you built this package yourself and trust the source folder.
+
+If the build script closes or reports an error, open Command Prompt in the ARES-X-Windows-0.9.3 folder and run:
+   py -3.11 -m pip install -r requirements.txt
+   py -3.11 -m PyInstaller --noconfirm --clean --windowed --name ARES-X --hidden-import=serial.tools.list_ports --add-data "assets;assets" ares_x_windows.py
+
+Run directly from source (optional):
+   py -3.11 -m pip install -r requirements.txt
+   py -3.11 ares_x_windows.py
+
+3. INITIAL RADIO / AUDIO SETUP
+A. CAT connection
+1. Connect the radio to the PC using its configured CAT/virtual serial interface.
+2. Close other applications that are using the same CAT COM port.
+3. Start ARES-X.
+4. Select the correct radio profile and COM port in the top radio controls.
+5. Set the baud rate to match the radio or virtual CAT port.
+6. Click CONNECT CAT.
+7. Confirm that the displayed frequency and mode agree with the radio before using any frequency-related function.
+
+Thetis / Hermes / ANAN and compatible CAT profiles:
+- Configure the radio software's virtual serial CAT port first.
+- Select the matching COM port and baud rate in ARES-X.
+- The default UI values may not match your computer; verify them rather than assuming COM3 / 9600 is correct.
+
+Yaesu FTDX10:
+- Select the Yaesu FTDX10 profile.
+- Use the radio's Enhanced COM Port, not an unrelated standard/other port.
+- Match the ARES-X baud rate to the radio CAT RATE. The profile defaults to 38400 when selected.
+- The current FTDX10 adapter provides frequency and mode read/control only. Do not assume ARES-X provides FTDX10 PTT, CW keying, or digital transmit control.
+
+Other radio profiles:
+- Some displayed radio choices are generic/planned compatibility options, not completed native adapters. Do not assume every listed model is supported. If CAT does not connect or read correctly, disconnect and use the radio manufacturer's supported CAT software/configuration.
+
+B. VAC audio input
+1. Configure Thetis (or your audio source) to send receive audio to the intended virtual audio cable.
+2. In Windows Sound settings, identify the VAC recording/input endpoint.
+3. In ARES-X, choose that VAC input in the VAC input dropdown. If it was added after ARES-X started, click REFRESH.
+4. Click LISTEN TO INPUT.
+5. Confirm that the audio level and spectrum respond when receive audio is present.
+6. If the level remains flat, check VAC routing, device selection, Windows input level, mute state, and Thetis VAC settings.
+
+The spectrum is based on real mono VAC audio. With a 48,000 samples/second VAC input, its one-sided Nyquist range is 0–24,000 Hz. The 16,384-point FFT improves frequency-bin spacing (about 2.93 Hz at 48 kHz); it does not create a 192 kHz-wide RF spectrum or replace an IQ spectrum source.
+
+4. WSJT-X FT4 / FT8 INTEGRATION
+WSJT-X performs the actual FT4/FT8 modulation and decoding. ARES-X receives WSJT-X decode/status messages through its local UDP bridge.
+
+Setup:
+1. Install and start WSJT-X separately. ARES-X does not include WSJT-X.
+2. Configure WSJT-X audio input to receive the intended Thetis/VAC receive audio. Verify that WSJT-X itself is decoding stations before troubleshooting ARES-X.
+3. In WSJT-X, open Settings → Reporting.
+4. Enable UDP Server. Use 127.0.0.1 and port 2237 unless you intentionally configure a different matching port.
+5. In ARES-X, click CONNECT WSJT-X.
+6. Watch DECODER OUTPUT and EVENT LOG for incoming decode and connection information.
+
+If no decodes arrive:
+- Confirm WSJT-X is decoding locally.
+- Confirm UDP Server is enabled.
+- Confirm address and port match ARES-X settings.
+- Check that another program is not occupying the UDP port.
+- Check Windows firewall rules for local application communication.
+
+5. MAIN RADIO / DIGITAL WORKSPACE
+- Radio controls: select profile, COM port, baud rate, connect CAT, view frequency/mode, select a band, and choose VAC input.
+- Packet Format / Digital Mode: AX-1 experiment controls and local encode/simulation tools. AX-1 is experimental; use it for lab evaluation, not as a validated on-air mode.
+- AUDIO FILE / LIVE INPUT: open a WAV for experimental decode, listen to live audio, stop listening, or connect the WSJT-X bridge.
+- DECODER OUTPUT: text output from the experimental decoder and/or bridged WSJT-X messages.
+- INCOMING STATIONS: lists incoming WSJT-X decode reports. Selecting a row is receive-only.
+- EVENT LOG: status and activity messages. In this release it is positioned at the top of the far-right column, above WSJT-X FUNCTIONS.
+- SPECTRUM / WATERFALL: visualizes the selected VAC audio stream, not a wideband RF/IQ spectrum.
+- WSJT-X FUNCTIONS: controls for the WSJT-X bridge and selected-station actions.
+
+6. TRANSMIT SAFETY — READ BEFORE USING REPLY CONTROLS
+Selecting an incoming station is receive-only. The REPLY TO SELECTED CQ / QRZ action can send a reply request to WSJT-X and may result in RF transmission if WSJT-X and the radio are configured to transmit.
+
+Before any reply:
+- Verify the correct callsign and frequency.
+- Verify mode, power, antenna, load, audio routing, and PTT configuration.
+- Confirm WSJT-X is set up as intended and that its Enable Tx / sequencing state is understood.
+- Make sure the transmitter is safe to operate and that you are legally authorized.
+- Do not leave the station unattended.
+
+The HALT TX NOW control sends a WSJT-X UDP Halt Tx request. It is a software request, not a substitute for verifying that the radio has physically returned to receive. Confirm RX on the radio.
+
+ARES-X does not automatically confirm a completed QSO. A worked-station tracker status or manual “mark complete” action is not proof that a contact was completed or logged by WSJT-X. Review and log contacts using your normal logbook procedure.
+
+7. TOOLS TAB
+The TOOLS area contains X-TRACKER and additional station / operating utility tabs such as World Map, Satellites, Weather, Clocks, Compass, HF Propagation, and Contests & Events.
+- X-TRACKER: enter or inspect a callsign and Maidenhead locator and plot a locator when one is explicitly available. A callsign alone does not establish an exact station location.
+- World Map: schematic map display; do not interpret it as a live tracking feed unless the interface explicitly indicates live data.
+- Satellites: consult the linked orbital data source as needed. Do not assume the app calculates live satellite positions or pass predictions.
+- Weather / HF Propagation: online refreshes require internet access and may fail if data providers are unavailable. Propagation guidance is an estimate, not proof that a band is open.
+- Clocks / Compass: clock displays are informational; compass bearing is a manual visual aid, not a hardware sensor reading.
+- Contests & Events: use the linked official calendars to confirm current dates and rules.
+
+8. USER SETTINGS AND TROUBLESHOOTING
+ARES-X saves user preferences locally. If a setting is not applied, close and reopen ARES-X and check the selection again.
+
+CAT will not connect:
+- Check the selected COM port and baud rate.
+- Close other programs using the same port.
+- Confirm the correct radio profile and radio CAT/virtual COM configuration.
+- For FTDX10, use the Enhanced COM Port and matching CAT RATE.
+
+No VAC audio:
+- Select the Windows recording/input endpoint, not a playback/output endpoint.
+- Click REFRESH after connecting the VAC.
+- Check Thetis VAC routing and Windows recording level/mute settings.
+
+No WSJT-X decodes in ARES-X:
+- First confirm WSJT-X itself decodes.
+- Enable WSJT-X UDP Server and check host/port.
+- Click CONNECT WSJT-X in ARES-X.
+- Check firewall and port conflicts.
+
+Application will not start:
+- Run the EXE from dist\ARES-X\ARES-X.exe.
+- If the bundled runtime is missing or damaged, rebuild using build_windows.bat from the extracted source folder.
+- Keep the complete dist\ARES-X folder together; do not copy only the EXE elsewhere.
+
+9. KNOWN LIMITATIONS
+- Experimental preview; no claim of production readiness or full on-air validation.
+- AX-1 is an experimental protocol implementation and not a proven weak-signal digital mode.
+- WSJT-X remains the external FT4/FT8 modem and decoder.
+- VAC audio spectrum is not an RF IQ spectrum.
+- A 48 kHz VAC source cannot display a genuine 192 kHz-wide spectrum.
+- The FTDX10 CAT adapter is limited to frequency/mode control; no FTDX10 PTT/CW/digital transmit control is included.
+- Some radio choices are placeholders or generic CAT compatibility options.
+- No physical radio, antenna, or RF hardware test is certified by this software package.
+
+10. VERSION 0.9.16 DISTRIBUTION CONTENT
+This distribution includes the 0.9.16 UI updates:
+- Event Log moved to the right-hand column above WSJT-X FUNCTIONS.
+- GRID TRACKER tab renamed X-TRACKER.
+- 16,384-point VAC audio FFT in the main spectrum and Wide Graph.
+- 48 kHz VAC input gives 0–24 kHz one-sided audio bandwidth.
+
+For support / feedback, record:
+- Windows version
+- Python version used to build
+- Radio model and CAT profile
+- COM port and baud rate (do not share credentials or private network information)
+- VAC device sample rate and device name
+- Exact error message and the steps that caused it
+
+73 DE N2MDX
+N2MDX UNLIMITED
